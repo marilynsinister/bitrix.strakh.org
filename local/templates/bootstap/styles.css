@@ -1,0 +1,28 @@
+body {
+
+}
+main{
+	margin-top: 20px;
+}
+.starter-template {
+	padding: 3rem 1.5rem;
+	text-align: center;
+}
+.c-table thead th a{
+	white-space: nowrap;
+}
+.c-table thead th:nth-child(1){
+	width: 50px;
+}
+.c-table thead th:nth-child(2){
+	width: 300px;
+}
+.c-table thead th:nth-child(3){
+	width: 200px;
+}
+.c-table thead th:nth-child(4){
+	width: 60px;
+}
+.c-table thead th:nth-child(5){
+	width: 500px;
+}
