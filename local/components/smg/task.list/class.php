@@ -4,6 +4,8 @@ use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\SystemException;
 use Bitrix\Main\Loader;
 use Bitrix\Main\Type\Date;
+use Bitrix\Main\Data\cache;
+
 
 use Bitrix\Highloadblock as HL;
 use Bitrix\Main\Entity;
@@ -50,6 +52,7 @@ class CTaskManager extends CBitrixComponent
 				}
 			}
 		}
+		$arItem["EDIT_URL"] = str_replace('#id#', $arItem["ID"], $this->arParams['EDIT_URL']);
 		if (strlen($arItem["UF_DATETIME"]) > 0) {
 
 			$arItem["UF_DATETIME"] = $arItem["UF_DATETIME"]->format($DateFormat);
@@ -99,21 +102,34 @@ class CTaskManager extends CBitrixComponent
 	protected function getResult()
 	{
 
+		$cache = cache::createInstance();
+		$sort = $this->getSortParam();
+
+		$nav = new \Bitrix\Main\UI\PageNavigation("nav-more-news");
+		$nav->allowAllRecords($this->arParams["PAGE_SHOW_ALL"])->setPageSize($this->arParams["PAGE_COUNT"])->initFromUri();
+
+		$cache_id = $sort['field'].$sort['order'].$nav->getOffset().$nav->getLimit();
+
+		if ($cache->initCache($this->arParams['CACHE_TIME'], $cache_id,'/cache/tasks/'))
+		{
+			$this->arResult = $cache->getVars();
+
+		}
+		elseif ($cache->startDataCache()) {
+
 			$entity_data_class = $this->entityClass;
 
 			$arItems = array();
 
 			$nav = new \Bitrix\Main\UI\PageNavigation("nav-more-news");
-			$nav->allowAllRecords($this->arParams["PAGE_SHOW_ALL"])
-				->setPageSize($this->arParams["PAGE_COUNT"])
-				->initFromUri();
+			$nav->allowAllRecords($this->arParams["PAGE_SHOW_ALL"])->setPageSize($this->arParams["PAGE_COUNT"])->initFromUri();
 
-			$sort = $this->getSortParam();
+
 
 			$rsData = $entity_data_class::getList(array(
 				"select" => array("*"),
 				"order" => array($sort['field'] => $sort['order']),
-				"filter" => array("UF_ACTIVE"=>1),  // Задаем параметры фильтра выборки
+				"filter" => array("UF_ACTIVE" => 1),  // Задаем параметры фильтра выборки
 				"count_total" => true,
 				"offset" => $nav->getOffset(),
 				"limit" => $nav->getLimit(),
@@ -121,7 +137,7 @@ class CTaskManager extends CBitrixComponent
 
 			$nav->setRecordCount($rsData->getCount());
 
-			while($arData = $rsData->Fetch()){
+			while ($arData = $rsData->Fetch()) {
 
 				$this->prepareDate($arData);
 				$arItems[] = $arData;
@@ -129,6 +145,9 @@ class CTaskManager extends CBitrixComponent
 
 			$this->arResult['NAV'] = $nav;
 			$this->arResult['ITEMS'] = $arItems;
+
+			$cache->endDataCache($this->arResult);
+		}
 
 
 	}
@@ -161,6 +180,10 @@ class CTaskManager extends CBitrixComponent
 
 		$result = $entity_data_class::update($id, $data);
 
+		if ($result->isSuccess()){
+			$cache = \Bitrix\Main\Data\Cache::createInstance();
+			$cache->cleanDir('/cache/tasks/');
+		}
 		return $result->isSuccess();
 
 	}
@@ -177,6 +200,11 @@ class CTaskManager extends CBitrixComponent
 		);
 
 		$result = $entity_data_class::update($id, $data);
+
+		if ($result->isSuccess()){
+			$cache = \Bitrix\Main\Data\Cache::createInstance();
+			$cache->cleanDir('/cache/tasks/');
+		}
 
 		return $result->isSuccess();
 

@@ -1,12 +1,12 @@
 <? if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) die(); ?>
-<? global $APPLICATION; ?>
+<? global $APPLICATION;?>
 
 <div class="row">
 	<div class="col-10">
 		<div class="h1"><h1>Список задач</h1></div>
 	</div>
 	<div class="col-2 my-auto">
-		<a href="/new.php" class="btn btn-primary">Добавить новую</a>
+		<a href="<?=$arParams['NEW_URL']?>" class="btn btn-primary">Добавить новую</a>
 	</div>
 </div>
 
@@ -18,7 +18,7 @@ $APPLICATION->IncludeComponent(
 	"",
 	array(
 		"NAV_OBJECT" => $arResult['NAV'],
-		"SEF_MODE" => "N",
+		"SEF_MODE" => "Y",
 	),
 	false
 );
@@ -105,7 +105,7 @@ $APPLICATION->IncludeComponent(
 						<? if ($item['UF_STATUS'] != 3): ?>
 							<a href="#"><i class="fas fa-check" data-id="<?=$item['ID']?>"></i></a>
 						<? endif; ?>
-						<a href="/edit.php?id=<?=$item['ID']?>"><i class="fas fa-edit"></i></a>
+						<a href="<?=$item['EDIT_URL']?>"><i class="fas fa-edit"></i></a>
 						<a href="#"><i class="fas fa-times" data-id="<?=$item['ID']?>"></i></i></a>
 					</td>
 				</tr>

@@ -7,9 +7,30 @@ $APPLICATION->SetPageProperty("title", "Менеджер задач");
 $APPLICATION->SetPageProperty("NOT_SHOW_NAV_CHAIN", "Y");
 $APPLICATION->SetTitle("Менеджер задач");
 ?>
+<? $APPLICATION->IncludeComponent(
+	"smg:task",
+	"",
+	Array(
+		"HIBLOCK_ID"        => '1',
+		"DATE_FORMAT"       => 'd.m.Y H:i',
+		"PAGE_COUNT"        => 3,
+		"PAGE_SHOW_ALL"     => false,
+		"SORT_BY1"          => $_REQUEST['sort'],
+		"SORT_ORDER1"       => $_REQUEST['order'],
+		"CACHE_TIME"        => 3601,
+		"SEF_MODE"			=> "Y",
+		"SEF_FOLDER" => "/",
+		"SEF_URL_TEMPLATES" => Array(
+			"new" => "new/",
+			"tasks" => "",
+			"edit" => "edit/#id#/"
+		),
 
+	),
+	false
+);?>
 
-	<? $APPLICATION->IncludeComponent(
+	<?/* $APPLICATION->IncludeComponent(
 		"smg:task.list",
 		"",
 		Array(
@@ -23,7 +44,7 @@ $APPLICATION->SetTitle("Менеджер задач");
 			"CACHE_TIME"        => 3600,
 		),
 		false
-	);?>
+	);*/?>
 
 
 <?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");?>

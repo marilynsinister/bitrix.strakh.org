@@ -16,7 +16,8 @@ $(document).ready(function () {
 				},
 				success: function (data) {
 					if (data == '1'){
-						$(row.parents('tr').find('.status').html('Выполнена'));
+						$(row).parents('tr').find('.status').html('Выполнена');
+						$(row).parents('a').remove();
 					}
 
 				},

@@ -97,7 +97,7 @@ class CTaskManagerEdit extends CTaskManager
 
 			if ($request->getPost("submit") == 1) {
 
-				$this->update($request->getQuery("id"), $request->getPostList($request->getPost("id")));
+				$this->update($this->arParams["ELEMENT_ID"], $request->getPostList($request->getPost("id")));
 			}
 			$this->includeComponentTemplate();
 		}

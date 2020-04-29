@@ -19,8 +19,6 @@ class CTaskManagerNew extends CTaskManager
 
 	protected function add(&$data_post)
 	{
-		if ($this->errors)
-			throw new SystemException(current($this->errors));
 
 		$entity_data_class = $this->entityClass;
 
@@ -38,6 +36,8 @@ class CTaskManagerNew extends CTaskManager
 		$result = $entity_data_class::add($data);
 
 		if ($result) {
+			$cache = \Bitrix\Main\Data\Cache::createInstance();
+			$cache->cleanDir('/cache/tasks/');
 			$_SESSION['messages']['success'][] = array(
 				'text' => 'Задача успешно добавлена.',
 			);
