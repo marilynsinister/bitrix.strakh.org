@@ -29,25 +29,19 @@ $APPLICATION->IncludeComponent(
 
 <div class="row">
 	<div class="col-12">
-		<? if (isset($_GET['success_at']) && $_GET['success_at'] == 1): ?>
-			<div class="alert alert-success" role="alert">
-				Задача успешно добавлена.
-			</div>
-		<? elseif(isset($_GET['success_at']) && $_GET['success_at'] == 0): ?>
+		<? foreach ($_SESSION['messages']['error'] as $k => $error): ?>
 			<div class="alert alert-danger" role="alert">
-				Что-то пошло не так
+				<?=$error['text']?>
 			</div>
-		<? endif; ?>
+		<? unset($_SESSION['messages']['error'][$k]);
+		endforeach; ?>
+		<? foreach ($_SESSION['messages']['success'] as $k => $success): ?>
+			<div class="alert alert-success" role="alert">
+				<?=$success['text']?>
+			</div>
+			<? unset($_SESSION['messages']['success'][$k]);
+		endforeach; ?>
 
-		<? if (isset($_GET['success_et']) && $_GET['success_et'] == 1): ?>
-			<div class="alert alert-success" role="alert">
-				Задача успешно отредактирована.
-			</div>
-		<? elseif(isset($_GET['success_et']) && $_GET['success_et'] == 0): ?>
-			<div class="alert alert-danger" role="alert">
-				Что-то пошло не так
-			</div>
-		<? endif; ?>
 
 	</div>
 </div>
@@ -88,6 +82,9 @@ $APPLICATION->IncludeComponent(
 				<th scope="col">
 					Комментарий
 				</th>
+				<th scope="col">
+
+				</th>
 
 			</tr>
 			</thead>
@@ -97,12 +94,19 @@ $APPLICATION->IncludeComponent(
 					<th scope="row"><?=$item['ID']?></th>
 					<td><?=$item['UF_NAME']?></td>
 					<td><?=$item['UF_DATETIME']?></td>
-					<td>
-						<?=$item['UF_STATUS']?>
+					<td class="status">
+						<?=$item['STATUS']?>
 
 					</td>
 					<td>
 						<?=($item['UF_COMMENT'])?>
+					</td>
+					<td>
+						<? if ($item['UF_STATUS'] != 3): ?>
+							<a href="#"><i class="fas fa-check" data-id="<?=$item['ID']?>"></i></a>
+						<? endif; ?>
+						<a href="/edit.php?id=<?=$item['ID']?>"><i class="fas fa-edit"></i></a>
+						<a href="#"><i class="fas fa-times" data-id="<?=$item['ID']?>"></i></i></a>
 					</td>
 				</tr>
 			<? endforeach;?>

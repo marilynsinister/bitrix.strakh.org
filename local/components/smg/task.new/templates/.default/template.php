@@ -2,7 +2,7 @@
 <? global $APPLICATION; ?>
 
 <div class="row">
-	<div class="col-12">
+	<div class="col-6">
 
 		<h1>Новая задача</h1>
 		<form method="post">
@@ -12,7 +12,6 @@
 			</div>
 			<div class="form-group">
 				<label for="datetimepicker1">Дата и время</label>
-				<?/*<input data-format="dd.mm.yyyy hh:mm:ss" type="text" name="datetime" class="form-control needs-validation" id="InputDatetime"  placeholder="Введите дату">*/?>
 				<div  class="input-group date" data-target-input="nearest">
 					<input id="datetimepicker1" value="<?=$_POST['datetime']?>" data-format="dd.mm.yyyy hh:mm:ss" type="text" name="datetime" class="form-control needs-validation" placeholder="Введите дату" />
 					<div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
@@ -22,7 +21,7 @@
 			</div>
 			<div class="form-group">
 				<label for="InputComment">Комментарий</label>
-				<textarea  name="comment" class="form-control needs-validation" id="InputComment" placeholder="Комментарий" required><?=$_POST['comment']?></textarea>
+				<textarea  rows="5" name="comment" class="form-control needs-validation" id="InputComment" placeholder="Комментарий" required><?=$_POST['comment']?></textarea>
 			</div>
 
 			<button type="submit" name="submit" value="1" class="btn btn-primary">Создать</button>

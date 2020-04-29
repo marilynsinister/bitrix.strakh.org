@@ -11,7 +11,9 @@ use Bitrix\Main\Localization\Loc,
 	Bitrix\Main\Context,
 	Bitrix\Main\Request;
 
-class CTaskManagerNew extends CBitrixComponent
+CBitrixComponent::includeComponentClass("smg:task.list");
+
+class CTaskManagerNew extends CTaskManager
 {
 
 
@@ -20,56 +22,46 @@ class CTaskManagerNew extends CBitrixComponent
 		if ($this->errors)
 			throw new SystemException(current($this->errors));
 
-		$additionalCacheID = false;
-
-		$hlbl = 1; // Указываем ID нашего highloadblock блока к которому будет делать запросы.
-		$hlblock = HL\HighloadBlockTable::getById($hlbl)->fetch();
-
-		$entity = HL\HighloadBlockTable::compileEntity($hlblock);
-
-		$entity_data_class = $entity->getDataClass();
+		$entity_data_class = $this->entityClass;
 
 		// Массив полей для добавления
 		$data = array(
 			"UF_NAME"		 	=> $data_post['name'],
-			"UF_DATETIME" 		=> $data_post['datetime'],
+			"UF_DATETIME" 		=> date($this->arParams['DATE_FORMAT'], time()),
 			"UF_STATUS"			=> 1,
 			"UF_ACTIVE"			=> 1,
 			"UF_COMMENT" 		=> $data_post['comment'],
 		);
-//dz($data_post['name']);
+		if (!empty($data_post['datetime']))
+			$data["UF_DATETIME"] = $data_post['datetime'];
+
 		$result = $entity_data_class::add($data);
-		//dz($result);
-		if ($result) LocalRedirect("/?success_at=1");
 
-	}
-
-	protected function checkModules()
-	{
-		if (!Loader::includeModule('iblock'))
-		{
-			ShowError(Loc::getMessage('IBLOCK_MODULE_NOT_INSTALLED'));
-			return;
+		if ($result) {
+			$_SESSION['messages']['success'][] = array(
+				'text' => 'Задача успешно добавлена.',
+			);
 		}
-
-		if (!Loader::includeModule("highloadblock")){
-			//ShowError(Loc::getMessage('IBLOCK_MODULE_NOT_INSTALLED'));
-			return;
+		else{
+			$_SESSION['messages']['error'][] = array(
+				'text' => 'Что-то пошло не так',
+			);
 		}
-
+		LocalRedirect("/");
 	}
 
 	public function executeComponent()
 	{
 		try
 		{
-			$this->checkModules();
+			parent::checkModules();
+			parent::GetEntityDataClass();
 
 			$context = Context::getCurrent();
 			$request = $context->getRequest();
 
 			if ($request->getPost("submit") == 1) {
-				dz('1');
+
 				$this->add($request->getPostList());
 			}
 			$this->includeComponentTemplate();

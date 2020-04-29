@@ -11,43 +11,53 @@ use Bitrix\Main\Entity;
 
 class CTaskManager extends CBitrixComponent
 {
-	//Родительский метод проходит по всем параметрам переданным в $APPLICATION->IncludeComponent
-	//и применяет к ним функцию htmlspecialcharsex. В данном случае такая обработка избыточна.
-	//Переопределяем.
-	/*public function onPrepareComponentParams($arParams)
+
+	protected $entityClass;
+
+	public function __construct($component, $hlbl = null)
 	{
-		$result = array(
-			"CACHE_TYPE" => $arParams["CACHE_TYPE"],
-			"CACHE_TIME" => isset($arParams["CACHE_TIME"]) ?$arParams["CACHE_TIME"]: 36000000,
-		);
-		return $result;
-	}*/
+		parent::__construct($component);
+		if (!is_null($hlbl)){
+			$this->arParams['HIBLOCK_ID'] = intval($hlbl);
+		}
+	}
 
-	/*protected function getCacheKeys()
+	protected function GetEntityDataClass()
 	{
-		return array(
+		$hlbl = $this->arParams['HIBLOCK_ID'];
 
-		);
-	}*/
+		$hlblock = HL\HighloadBlockTable::getById($hlbl)->fetch();
 
-	/*protected function getFilter()
-	{
-		$filterFields = parent::getFilter();
+		$entity = HL\HighloadBlockTable::compileEntity($hlblock);
 
-		return $filterFields;
-	}*/
+		$entity_data_class = $entity->getDataClass();
+
+		$this->entityClass = $entity_data_class;
+
+		return $this->entityClass;
+	}
 	protected function prepareDate(&$arItem)
 	{
 		$DateFormat = $this->arParams["DATE_FORMAT"];
 
+		if (!empty($arItem["UF_STATUS"])){
+			$UserField = CUserFieldEnum::GetList(array(), array("USER_FIELD_ID" => 4));
 
+			while($UserFieldAr = $UserField->GetNext())
+			{
+				if ($UserFieldAr['ID'] == $arItem["UF_STATUS"]){
+					$arItem["STATUS"] = $UserFieldAr['VALUE'];
+				}
+			}
+		}
 		if (strlen($arItem["UF_DATETIME"]) > 0) {
 
 			$arItem["UF_DATETIME"] = $arItem["UF_DATETIME"]->format($DateFormat);
 		}
 	}
 
-	protected function getSortParam(){
+	protected function getSortParam()
+	{
 
 		$sort = array(
 			'field' => 'UF_DATETIME',
@@ -88,63 +98,8 @@ class CTaskManager extends CBitrixComponent
 	}
 	protected function getResult()
 	{
-		if ($this->errors)
-			throw new SystemException(current($this->errors));
 
-		$additionalCacheID = false;
-		//if ($this->startResultCache($this->arParams['CACHE_TIME'], $additionalCacheID)) {
-
-			//SELECT
-			/*$arSelect = array_merge($this->arParams["FIELD_CODE"], array(
-				"IBLOCK_ID",
-				"ID",
-			));
-
-			foreach ($this->arParams["PROPERTY_CODE"] as $prop_name) {
-				$arSelect[] = "PROPERTY_" . $prop_name;
-			}
-
-			//WHERE
-			$arFilter = array(
-				"IBLOCK_ID" => $this->arParams["IBLOCK_ID"],
-				"IBLOCK_LID" => SITE_ID,
-				"ACTIVE" => "Y",
-			);
-
-			//ORDER BY
-			$arSort = array(
-				$this->arParams["SORT_BY1"] => $this->arParams["SORT_ORDER1"]
-			);
-
-			if (!array_key_exists("ID", $arSort))
-				$arSort["ID"] = "DESC";
-
-			$arNavParams["nTopCount"] = $this->arParams['TOP_COUNT'];
-
-			//GETLIST
-			$rsElement = CIBlockElement::GetList($arSort, $arFilter, false, $arNavParams, $arSelect);
-
-			dz($arFilter);
-			if (!$rsElement) {
-				$this->abortResultCache();
-			}
-
-			$rsElement->SetUrlTemplates($this->arParams["DETAIL_URL"], "", $this->arParams["IBLOCK_URL"]);
-
-			while ($obElement = $rsElement->GetNextElement()) {
-				$arItem = $obElement->GetFields();
-
-				//$this->prepareDate($arItem);
-
-				$arResult["ITEMS"][] = $arItem;
-			}*/
-		//if ($this->startResultCache($this->arParams['CACHE_TIME'], $additionalCacheID)) {
-			$hlbl = 1; // Указываем ID нашего highloadblock блока к которому будет делать запросы.
-			$hlblock = HL\HighloadBlockTable::getById($hlbl)->fetch();
-
-			$entity = HL\HighloadBlockTable::compileEntity($hlblock);
-
-			$entity_data_class = $entity->getDataClass();
+			$entity_data_class = $this->entityClass;
 
 			$arItems = array();
 
@@ -164,10 +119,6 @@ class CTaskManager extends CBitrixComponent
 				"limit" => $nav->getLimit(),
 			));
 
-			if (!$rsData) {
-				$this->abortResultCache();
-			}
-
 			$nav->setRecordCount($rsData->getCount());
 
 			while($arData = $rsData->Fetch()){
@@ -179,7 +130,7 @@ class CTaskManager extends CBitrixComponent
 			$this->arResult['NAV'] = $nav;
 			$this->arResult['ITEMS'] = $arItems;
 
-		//}
+
 	}
 
 	protected function checkModules()
@@ -197,11 +148,46 @@ class CTaskManager extends CBitrixComponent
 
 	}
 
+	public function setComplete($id)
+	{
+		$this->GetEntityDataClass();
+
+		$entity_data_class = $this->entityClass;
+
+		// Массив полей для добавления
+		$data = array(
+			"UF_STATUS"			=> 3,
+		);
+
+		$result = $entity_data_class::update($id, $data);
+
+		return $result->isSuccess();
+
+	}
+
+	public function setInactive($id)
+	{
+		$this->GetEntityDataClass();
+
+		$entity_data_class = $this->entityClass;
+
+		// Массив полей для добавления
+		$data = array(
+			"UF_ACTIVE"			=> 0,
+		);
+
+		$result = $entity_data_class::update($id, $data);
+
+		return $result->isSuccess();
+
+	}
+
 	public function executeComponent()
 	{
 		try
 		{
 			$this->checkModules();
+			$this->GetEntityDataClass();
 			$this->getResult();
 			$this->includeComponentTemplate();
 		}

@@ -13,8 +13,7 @@ $APPLICATION->SetTitle("Менеджер задач");
 		"smg:task.list",
 		"",
 		Array(
-			"IBLOCK_TYPE"       => 'content',
-			"IBLOCK_ID"         => '2',
+			"HIBLOCK_ID"        => '1',
 			"DATE_FORMAT"       => 'd.m.Y H:i',
 			"PAGE_COUNT"        => 3,
 			"PAGE_SHOW_ALL"     => false,
